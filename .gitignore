@@ -1,0 +1,20 @@
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.idea/
+.packages
+.pub-cache/
+.vscode/
+build/
+coverage/
+**/pubspec.lock
+
+# Application lockfile is resolved once at workspace root and should be committed.
+!/pubspec.lock
+
+# Flutter generated files
+**/android/.gradle/
+**/android/local.properties
+**/ios/Flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/windows/flutter/ephemeral/

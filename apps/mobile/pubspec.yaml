@@ -1,0 +1,28 @@
+name: device_guide_mobile
+description: Mobile device-guide application for visitors and registered users.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.0
+resolution: workspace
+
+dependencies:
+  blocs:
+    path: ../../packages/blocs
+  domain:
+    path: ../../packages/domain
+  flutter:
+    sdk: flutter
+  flutter_bloc: 9.1.1
+  flutter_localizations:
+    sdk: flutter
+  go_router: 18.1.0
+
+dev_dependencies:
+  flutter_lints: 6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

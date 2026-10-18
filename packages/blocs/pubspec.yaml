@@ -1,0 +1,17 @@
+name: blocs
+description: Shared state management for the device-guide clients.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+resolution: workspace
+
+dependencies:
+  bloc: 9.2.1
+  domain:
+    path: ../domain
+  equatable: 3.0.0
+
+dev_dependencies:
+  test: 1.31.1
