@@ -1,4 +1,4 @@
-# tim-01
+=# tim-01
 # Vodič za uređaje
 
 Vodič za uređaje je multiplatformska informativna aplikacija za Dyson uređaje. Korisnici mogu da pregledaju katalog, popune upitnik i dobiju personalizovane preporuke, uporede modele, pročitaju vesti i pogledaju video-uputstva za korišćenje i održavanje. Aplikacija ne obrađuje kupovinu i plaćanje; zainteresovani korisnici mogu da pošalju upit za cenu putem Instagrama.
@@ -45,3 +45,50 @@ Katalog, stranice uređaja, poređenja, vodiči, video-uputstva i objavljene ves
 | Javni veb | Svi posetioci | Jaspr | Pregledač |
 | Server | Mobilna aplikacija, backoffice i javni veb | Relic, PostgreSQL | Linux |
 | Domenski paket | Svi delovi sistema | Dart | Sve platforme |
+
+## Razvoj
+
+Repozitorijum je postavljen kao Dart pub workspace:
+
+```text
+apps/
+  mobile/       Flutter aplikacija za korisnike
+  backoffice/   Flutter aplikacija za urednike, za Windows i veb
+packages/
+  domain/       model recenzije, stanja, pravila i port repozitorijuma
+  blocs/        zajednički ReviewBloc, događaji i stanja ekrana
+tool/
+  generate_platforms.ps1
+  verify.ps1
+```
+
+Za KT1 glavni pojam je korisnička recenzija. Mobilna aplikacija prikazuje zapise, detalj, formu za novu recenziju i prijavljivanje sadržaja. Backoffice daje uredniku tabelu ili listu, pretragu, filtere, bočni detalj i akcije moderacije. Oba klijenta koriste iste pakete `domain` i `blocs`, ali imaju zasebne podatke u memoriji.
+
+### Prvo pokretanje
+
+Potrebni su Flutter 3.47 ili noviji sa Dart 3.13 ili novijim, Android alatke i Visual Studio sa paketom Desktop development with C++.
+
+```powershell
+# Iz korena repozitorijuma, samo prvi put:
+.\tool\generate_platforms.ps1
+
+# Provera formata, analize i testova:
+.\tool\verify.ps1
+
+# Mobilna aplikacija:
+Push-Location apps\mobile
+flutter run
+Pop-Location
+
+# Backoffice za Windows:
+Push-Location apps\backoffice
+flutter run -d windows
+
+# Isti backoffice u pregledaču:
+flutter run -d chrome
+Pop-Location
+```
+
+Skripta za platforme ne prepisuje postojeće foldere. Ako su `android`, `windows` ili `web` već generisani, zaustaviće se i tražiti da se stanje prvo ručno proveri.
+
+Detaljan redosled rada i kriterijumi završetka nalaze se u [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
