@@ -37,6 +37,16 @@ void main() {
     await bloc.close();
   });
 
+  test('empty repository emits loading and empty states', () async {
+    final bloc = createBloc(_FakeRepository([]));
+    final states = bloc.stream.take(2).toList();
+
+    bloc.add(const ReviewsRequested());
+
+    expect(await states, [const ReviewsLoading(), const ReviewsEmpty()]);
+    await bloc.close();
+  });
+
   test('failure demo exposes retry state', () async {
     final bloc = createBloc(_FakeRepository([seedReview()]));
     final states = bloc.stream.take(2).toList();

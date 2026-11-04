@@ -6,6 +6,10 @@ import 'data/memory_review_repository.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  final repository = MemoryReviewRepository(createDemoReviews());
+  const demoEmpty = bool.fromEnvironment('KT1_DEMO_EMPTY');
+  const demoDelayMs = int.fromEnvironment('KT1_DEMO_DELAY_MS', defaultValue: 350);
+  final reviews = createDemoReviews();
+  if (demoEmpty) reviews.clear();
+  final repository = MemoryReviewRepository(reviews, latency: Duration(milliseconds: demoDelayMs));
   runApp(DeviceGuideMobileApp(repository: repository, failureController: repository));
 }

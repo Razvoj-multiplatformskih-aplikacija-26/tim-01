@@ -1,4 +1,3 @@
-=# tim-01
 # Vodič za uređaje
 
 Vodič za uređaje je multiplatformska informativna aplikacija za Dyson uređaje. Korisnici mogu da pregledaju katalog, popune upitnik i dobiju personalizovane preporuke, uporede modele, pročitaju vesti i pogledaju video-uputstva za korišćenje i održavanje. Aplikacija ne obrađuje kupovinu i plaćanje; zainteresovani korisnici mogu da pošalju upit za cenu putem Instagrama.
@@ -66,11 +65,11 @@ Za KT1 glavni pojam je korisnička recenzija. Mobilna aplikacija prikazuje zapis
 
 ### Prvo pokretanje
 
-Potrebni su Flutter 3.47 ili noviji sa Dart 3.13 ili novijim, Android alatke i Visual Studio sa paketom Desktop development with C++.
+Potrebni su Flutter 3.47 ili noviji sa Dart 3.13 ili novijim i Android alatke. Za backoffice na Windows desktopu potreban je i Visual Studio sa paketom Desktop development with C++; za Chrome nije potreban.
 
 ```powershell
-# Iz korena repozitorijuma, samo prvi put:
-.\tool\generate_platforms.ps1
+# Iz korena repozitorijuma:
+flutter pub get
 
 # Provera formata, analize i testova:
 .\tool\verify.ps1
@@ -89,6 +88,26 @@ flutter run -d chrome
 Pop-Location
 ```
 
-Skripta za platforme ne prepisuje postojeće foldere. Ako su `android`, `windows` ili `web` već generisani, zaustaviće se i tražiti da se stanje prvo ručno proveri.
+### Prikaz četiri stanja na KT1
+
+Normalan start učitava deset recenzija. Na mobilnom ekranu recenzija pritisnite `Osveži` da pokažete učitavanje, dugme sa bubom da izazovete grešku, pa `Pokušaj ponovo` za povratak na podatke. Duže demo kašnjenje čini učitavanje vidljivijim:
+
+```powershell
+Push-Location apps\mobile
+flutter run --dart-define=KT1_DEMO_DELAY_MS=1500
+Pop-Location
+```
+
+Za prazan prikaz zaustavite prethodni `flutter run` tasterom `q`, pa ponovo pokrenite aplikaciju sa praznim memorijskim repozitorijumom:
+
+```powershell
+Push-Location apps\mobile
+flutter run --dart-define=KT1_DEMO_EMPTY=true --dart-define=KT1_DEMO_DELAY_MS=1500
+Pop-Location
+```
+
+Isti `KT1_DEMO_EMPTY` i `KT1_DEMO_DELAY_MS` argumenti rade i u `apps\backoffice` (na primer uz `flutter run -d chrome`). Bez tih argumenata aplikacije rade sa uobičajenim demo podacima. Pošto su ovo `dart-define` vrednosti, za promenu režima treba novo pokretanje, ne samo hot reload.
+
+Platformski folderi `android`, `windows` i `web` već su u repozitorijumu. `tool\generate_platforms.ps1` služi samo za početno generisanje platformi i namerno staje ako folderi već postoje; ne pokreće se pri običnom kloniranju i startovanju projekta.
 
 Detaljan redosled rada i kriterijumi završetka nalaze se u [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).

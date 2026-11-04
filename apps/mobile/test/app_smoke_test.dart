@@ -24,4 +24,37 @@ void main() {
     expect(find.text('Prijatniji je za svakodnevno sušenje'), findsOneWidget);
     expect(find.text('Nova recenzija'), findsOneWidget);
   });
+
+  testWidgets('shows the empty review state', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(412, 915));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = MemoryReviewRepository([], latency: Duration.zero);
+    await tester.pumpWidget(DeviceGuideMobileApp(repository: repository, failureController: repository));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Pogledaj recenzije'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Još nema recenzija.'), findsOneWidget);
+  });
+
+  testWidgets('shows an error and recovers after retry', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(412, 915));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = MemoryReviewRepository(createDemoReviews(), latency: Duration.zero);
+    await tester.pumpWidget(DeviceGuideMobileApp(repository: repository, failureController: repository));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Pogledaj recenzije'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Izazovi grešku sledećeg zahteva'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Podaci trenutno ne mogu da se učitaju.'), findsOneWidget);
+    await tester.tap(find.text('Pokušaj ponovo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Prijatniji je za svakodnevno sušenje'), findsOneWidget);
+  });
 }

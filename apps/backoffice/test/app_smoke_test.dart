@@ -27,4 +27,15 @@ void main() {
     expect(find.text('Status: Na proveri'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('shows the empty moderation state', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(1400, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final repository = MemoryReviewRepository([], latency: Duration.zero);
+    await tester.pumpWidget(DeviceGuideBackofficeApp(repository: repository, failureController: repository));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nema recenzija za obradu.'), findsOneWidget);
+  });
 }
