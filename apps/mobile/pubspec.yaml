@@ -20,9 +20,18 @@ dependencies:
   go_router: 18.1.0
 
 dev_dependencies:
+  flutter_launcher_icons: 0.14.4
   flutter_lints: 6.0.0
   flutter_test:
     sdk: flutter
 
 flutter:
   uses-material-design: true
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/branding/styletech_serbia.jpeg
+  adaptive_icon_background: '#000000'
+  adaptive_icon_foreground: assets/branding/styletech_serbia.jpeg
+  adaptive_icon_foreground_inset: 20
