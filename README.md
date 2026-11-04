@@ -21,7 +21,17 @@ Korisnička recenzija prolazi kroz stanja: na proveri, objavljena, privremeno sa
 
 3. Pravila
 
+Pri unosu recenzije važe pravila iz zajedničkog paketa `domain`:
+
+- Naslov mora imati od 5 do 80 grafema (vidljivih znakova).
+- Tekst recenzije mora imati od 30 do 1000 grafema.
+- Ocena mora biti ceo broj od 1 do 5.
+
+Mobilna forma poziva ove domenske provere pri unosu i prikazuje poruke na srpskom.
+
 Server automatski privremeno sakriva objavljenu recenziju kada je prijave najmanje tri različita registrovana korisnika. Server proverava da prijave potiču od različitih korisnika i menja stanje recenzije, nakon čega urednik odlučuje da li će je ponovo objaviti ili odbiti.
+
+U KT1 pravilo prijavljivanja izvršava paket `domain` nad memorijskim podacima. Kada se uvede server, on će isto pravilo ponovo proveravati nad svežim podacima.
 
 4. Rad bez mreže
 
@@ -62,6 +72,8 @@ tool/
 ```
 
 Za KT1 glavni pojam je korisnička recenzija. Mobilna aplikacija prikazuje zapise, detalj, formu za novu recenziju i prijavljivanje sadržaja. Backoffice daje uredniku tabelu ili listu, pretragu, filtere, bočni detalj i akcije moderacije. Oba klijenta koriste iste pakete `domain` i `blocs`, ali imaju zasebne podatke u memoriji.
+
+Uvod README-a opisuje planirani završni sistem. Upitnik i preporuke, poređenje uređaja, vesti, video-uputstva, omiljeni uređaji, offline sinhronizacija, server i javni veb nisu deo završenog KT1 obima; dodaju se kroz naredne kontrolne tačke.
 
 ### Prvo pokretanje
 
