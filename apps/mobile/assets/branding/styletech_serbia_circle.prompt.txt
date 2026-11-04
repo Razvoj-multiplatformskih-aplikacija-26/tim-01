@@ -1,0 +1,6 @@
+Tool: built-in imagegen
+Source: styletech_serbia.jpeg
+Output: styletech_serbia_circle.png (transparent PNG)
+
+Final prompt:
+Edit the supplied existing logo into a professionally finished circular Android app icon cutout. Keep its interior composition and the exact words 'StyleTech_Serbia' unchanged. The ONLY area to change is the perimeter. Trim away the entire irregular exterior black bevel, every side strip/green line, all exterior reflections and colored fringe. Finish the outside with ONE perfectly smooth, thin, continuous metallic-gold circular border. You may trim 1-2% of the existing outer rim to achieve an absolutely clean geometric circular silhouette. The circumference must be uniform, no glints protruding, no halo, no shadows, no jagged pixels, no colored flecks. Keep the black interior disk, woman's profile/hair/dryer symbol, typography, text and internal decorative star/lines intact. Center the circle on a square PNG canvas, leave a uniform 4% fully transparent margin on all four sides. Fully transparent alpha outside the circle. No new content, no retyping the text, no redesign of interior.
