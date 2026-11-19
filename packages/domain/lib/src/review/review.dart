@@ -29,14 +29,20 @@ final class Review {
   final DateTime submittedAt;
   final Set<UserId> reportedBy;
 
-  Review copyWith({ReviewStatus? status, Set<UserId>? reportedBy}) {
+  Review copyWith({
+    ReviewTitle? title,
+    ReviewBody? body,
+    RatingValue? rating,
+    ReviewStatus? status,
+    Set<UserId>? reportedBy,
+  }) {
     return Review(
       id: id,
       deviceId: deviceId,
       authorId: authorId,
-      title: title,
-      body: body,
-      rating: rating,
+      title: title ?? this.title,
+      body: body ?? this.body,
+      rating: rating ?? this.rating,
       status: status ?? this.status,
       submittedAt: submittedAt,
       reportedBy: reportedBy ?? this.reportedBy,

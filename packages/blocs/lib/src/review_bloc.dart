@@ -19,6 +19,7 @@ final class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     : super(const ReviewInitial()) {
     on<ReviewsRequested>(_onReviewsRequested);
     on<ReviewSubmitted>(_onReviewSubmitted);
+    on<ReviewEdited>(_onReviewEdited);
     on<ReviewReported>(_onReviewReported);
     on<ReviewApproved>(_onReviewApproved);
     on<ReviewRejectedByEditor>(_onReviewRejected);
@@ -32,6 +33,10 @@ final class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   final DateTime Function() _clock;
   final RequestFailureController? _failureController;
   int _revision = 0;
+
+  bool get canSimulateFailure => _failureController != null;
+
+  bool get canEditReviews => _repository is ReviewEditingRepository;
 
   Future<void> _onReviewsRequested(ReviewsRequested event, Emitter<ReviewState> emit) async {
     await _load(emit);
@@ -51,20 +56,34 @@ final class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
       _emitActionError(emit, error);
       return;
     }
-    await _completeMutation(await _repository.addReview(review.valueOrNull!), ReviewAction.submitted, emit);
+    await _runMutation(() => _repository.addReview(review.valueOrNull!), ReviewAction.submitted, emit);
+  }
+
+  Future<void> _onReviewEdited(ReviewEdited event, Emitter<ReviewState> emit) async {
+    final repository = _repository;
+    if (repository is! ReviewEditingRepository) {
+      _emitActionError(emit, const ReviewActionNotAllowed());
+      return;
+    }
+    final editor = repository as ReviewEditingRepository;
+    await _runMutation(
+      () => editor.editReview(id: event.id, title: event.title, body: event.body, rating: event.rating),
+      ReviewAction.edited,
+      emit,
+    );
   }
 
   Future<void> _onReviewReported(ReviewReported event, Emitter<ReviewState> emit) async {
-    await _completeMutation(
-      await _repository.reportReview(id: event.id, reporterId: event.reporterId, now: _clock()),
+    await _runMutation(
+      () => _repository.reportReview(id: event.id, reporterId: event.reporterId, now: _clock()),
       ReviewAction.reported,
       emit,
     );
   }
 
   Future<void> _onReviewApproved(ReviewApproved event, Emitter<ReviewState> emit) async {
-    await _completeMutation(
-      await _repository.changeReviewStatus(
+    await _runMutation(
+      () => _repository.changeReviewStatus(
         id: event.id,
         status: ReviewPublished(publishedAt: _clock().toUtc()),
       ),
@@ -74,8 +93,8 @@ final class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   }
 
   Future<void> _onReviewRejected(ReviewRejectedByEditor event, Emitter<ReviewState> emit) async {
-    await _completeMutation(
-      await _repository.changeReviewStatus(
+    await _runMutation(
+      () => _repository.changeReviewStatus(
         id: event.id,
         status: ReviewRejected(rejectedAt: _clock().toUtc(), reason: event.reason),
       ),
@@ -85,8 +104,8 @@ final class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   }
 
   Future<void> _onReviewRepublished(ReviewRepublished event, Emitter<ReviewState> emit) async {
-    await _completeMutation(
-      await _repository.changeReviewStatus(
+    await _runMutation(
+      () => _repository.changeReviewStatus(
         id: event.id,
         status: ReviewPublished(publishedAt: _clock().toUtc()),
       ),
@@ -96,8 +115,8 @@ final class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   }
 
   Future<void> _onReviewArchived(ReviewArchivedByEditor event, Emitter<ReviewState> emit) async {
-    await _completeMutation(
-      await _repository.changeReviewStatus(
+    await _runMutation(
+      () => _repository.changeReviewStatus(
         id: event.id,
         status: ReviewArchived(archivedAt: _clock().toUtc()),
       ),
@@ -111,12 +130,34 @@ final class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     await _load(emit);
   }
 
-  Future<void> _completeMutation(Result<Review> result, ReviewAction action, Emitter<ReviewState> emit) async {
+  Future<void> _runMutation(
+    Future<Result<Review>> Function() operation,
+    ReviewAction action,
+    Emitter<ReviewState> emit,
+  ) async {
+    final Result<Review> result;
+    try {
+      result = await operation();
+    } on DomainError catch (error) {
+      await _recoverFromActionError(emit, error);
+      return;
+    } on Object {
+      _emitActionError(emit, const ServerUnavailable());
+      return;
+    }
     if (result case Failure<Review>(:final error)) {
-      _emitActionError(emit, error);
+      await _recoverFromActionError(emit, error);
       return;
     }
     await _load(emit, lastAction: action);
+  }
+
+  Future<void> _recoverFromActionError(Emitter<ReviewState> emit, DomainError error) async {
+    if (error is SessionExpired || error is ServerUnavailable || error is UnknownServerError) {
+      _emitActionError(emit, error);
+      return;
+    }
+    await _load(emit, actionError: error);
   }
 
   void _emitActionError(Emitter<ReviewState> emit, DomainError error) {
@@ -128,17 +169,24 @@ final class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     emit(ReviewActionFailure(error: error, revision: ++_revision));
   }
 
-  Future<void> _load(Emitter<ReviewState> emit, {ReviewAction? lastAction}) async {
+  Future<void> _load(Emitter<ReviewState> emit, {ReviewAction? lastAction, DomainError? actionError}) async {
     emit(const ReviewsLoading());
     try {
       final reviews = await _repository.loadReviews();
       if (reviews.isEmpty) {
-        emit(const ReviewsEmpty());
+        emit(ReviewsEmpty(lastAction: lastAction, actionError: actionError));
       } else {
-        emit(ReviewsReady(reviews: reviews, lastAction: lastAction, revision: ++_revision));
+        emit(ReviewsReady(reviews: reviews, lastAction: lastAction, actionError: actionError, revision: ++_revision));
       }
     } on Object catch (error) {
-      emit(ReviewsFailure(debugMessage: error.toString()));
+      emit(
+        ReviewsFailure(
+          debugMessage: error.toString(),
+          loadError: error is DomainError ? error : null,
+          lastAction: lastAction,
+          actionError: actionError,
+        ),
+      );
     }
   }
 }

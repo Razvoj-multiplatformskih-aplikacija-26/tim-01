@@ -40,6 +40,18 @@ final class ReviewReported extends ReviewEvent {
   List<Object?> get props => [id, reporterId];
 }
 
+final class ReviewEdited extends ReviewEvent {
+  const ReviewEdited({required this.id, required this.title, required this.body, required this.rating});
+
+  final ReviewId id;
+  final String title;
+  final String body;
+  final int rating;
+
+  @override
+  List<Object?> get props => [id, title, body, rating];
+}
+
 final class ReviewApproved extends ReviewEvent {
   const ReviewApproved(this.id);
 

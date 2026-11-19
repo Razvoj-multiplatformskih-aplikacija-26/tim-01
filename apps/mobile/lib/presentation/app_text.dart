@@ -6,12 +6,16 @@ String domainErrorMessage(DomainError error) => switch (error) {
   ReviewTitleTooLong(:final maximum) => 'Naslov može da ima najviše $maximum znakova.',
   ReviewBodyTooShort(:final minimum) => 'Recenzija mora da ima najmanje $minimum znakova.',
   ReviewBodyTooLong(:final maximum) => 'Recenzija može da ima najviše $maximum znakova.',
-  RatingOutOfRange() => 'Ocena mora biti od 1 do 5.',
+  RatingOutOfRange(:final minimum, :final maximum) => 'Ocena mora biti od $minimum do $maximum.',
   InvalidReviewTransition() => 'Ova promena stanja nije dozvoljena.',
   ReviewAlreadyReported() => 'Već ste prijavili ovu recenziju.',
   CannotReportOwnReview() => 'Ne možete prijaviti svoju recenziju.',
   ReviewActionNotAllowed() => 'Ova radnja trenutno nije dozvoljena.',
   ReviewNotFound() => 'Recenzija više nije dostupna.',
+  ForbiddenReviewAction() => 'Nemate pravo da izvršite ovu radnju.',
+  SessionExpired() => 'Prijava je istekla. Prijavite se ponovo.',
+  ServerUnavailable() => 'Server trenutno nije dostupan. Pokušajte ponovo.',
+  UnknownServerError() => 'Došlo je do greške. Pokušajte ponovo.',
 };
 
 String reviewStatusLabel(ReviewStatus status) => switch (status) {
@@ -24,6 +28,7 @@ String reviewStatusLabel(ReviewStatus status) => switch (status) {
 
 String reviewActionMessage(ReviewAction action) => switch (action) {
   ReviewAction.submitted => 'Recenzija je poslata na proveru.',
+  ReviewAction.edited => 'Izmene recenzije su sačuvane.',
   ReviewAction.reported => 'Prijava je zabeležena.',
   ReviewAction.approved => 'Recenzija je objavljena.',
   ReviewAction.rejected => 'Recenzija je odbijena.',

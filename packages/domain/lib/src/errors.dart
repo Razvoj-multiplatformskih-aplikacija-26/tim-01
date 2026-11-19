@@ -64,15 +64,18 @@ final class ReviewBodyTooLong extends DomainError {
 
 @immutable
 final class RatingOutOfRange extends DomainError {
-  const RatingOutOfRange(this.value);
+  const RatingOutOfRange(this.value, {this.minimum = 1, this.maximum = 5});
 
   final int value;
+  final int minimum;
+  final int maximum;
 
   @override
-  bool operator ==(Object other) => other is RatingOutOfRange && other.value == value;
+  bool operator ==(Object other) =>
+      other is RatingOutOfRange && other.value == value && other.minimum == minimum && other.maximum == maximum;
 
   @override
-  int get hashCode => Object.hash(RatingOutOfRange, value);
+  int get hashCode => Object.hash(RatingOutOfRange, value, minimum, maximum);
 }
 
 @immutable
@@ -106,4 +109,20 @@ final class ReviewActionNotAllowed extends DomainError {
 
 final class ReviewNotFound extends DomainError {
   const ReviewNotFound();
+}
+
+final class ForbiddenReviewAction extends DomainError {
+  const ForbiddenReviewAction();
+}
+
+final class SessionExpired extends DomainError {
+  const SessionExpired();
+}
+
+final class ServerUnavailable extends DomainError {
+  const ServerUnavailable();
+}
+
+final class UnknownServerError extends DomainError {
+  const UnknownServerError();
 }

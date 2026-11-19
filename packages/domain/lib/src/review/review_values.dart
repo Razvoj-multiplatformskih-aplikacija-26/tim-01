@@ -8,6 +8,9 @@ import '../result.dart';
 final class ReviewTitle {
   const ReviewTitle._(this.value);
 
+  /// Reconstructs a stored value without applying the rules for new writes.
+  const ReviewTitle.fromStored(this.value);
+
   static const minimumLength = 5;
   static const maximumLength = 80;
 
@@ -37,6 +40,9 @@ final class ReviewTitle {
 @immutable
 final class ReviewBody {
   const ReviewBody._(this.value);
+
+  /// Reconstructs a stored value without applying the rules for new writes.
+  const ReviewBody.fromStored(this.value);
 
   static const minimumLength = 30;
   static const maximumLength = 1000;
@@ -68,13 +74,18 @@ final class ReviewBody {
 final class RatingValue {
   const RatingValue._(this.value);
 
+  /// Reconstructs a stored value without applying the rules for new writes.
+  const RatingValue.fromStored(this.value);
+
   static const minimum = 1;
   static const maximum = 5;
 
   final int value;
 
   static Result<RatingValue> fromInt(int input) {
-    if (input < minimum || input > maximum) return Failure(RatingOutOfRange(input));
+    if (input < minimum || input > maximum) {
+      return Failure(RatingOutOfRange(input, minimum: minimum, maximum: maximum));
+    }
     return Success(RatingValue._(input));
   }
 

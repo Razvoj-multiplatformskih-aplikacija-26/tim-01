@@ -76,6 +76,45 @@ void main() {
     expect((emitted.last as ReviewsReady).reviews, hasLength(2));
     await bloc.close();
   });
+
+  test('a rejected action reloads changed data and keeps the rejection reason', () async {
+    final repository = _FakeRepository([seedReview()]);
+    final bloc = createBloc(repository);
+    final ready = bloc.stream.firstWhere((state) => state is ReviewsReady);
+    bloc.add(const ReviewsRequested());
+    await ready;
+
+    repository.reviews.clear();
+    final states = bloc.stream.take(2).toList();
+    bloc.add(const ReviewReported(id: ReviewId('seed'), reporterId: UserId('user-2')));
+
+    expect(await states, [const ReviewsLoading(), const ReviewsEmpty(actionError: ReviewNotFound())]);
+    await bloc.close();
+  });
+
+  test('a saved review remains confirmed if the following load fails', () async {
+    final repository = _FakeRepository([])..failNextRequest();
+    final bloc = createBloc(repository);
+    final states = bloc.stream.take(2).toList();
+    bloc.add(
+      const ReviewSubmitted(
+        deviceId: DeviceId('device-2'),
+        authorId: UserId('user-2'),
+        title: 'Nova recenzija',
+        body: 'Nova recenzija takođe ima dovoljno znakova da prođe pravilo domena.',
+        rating: 5,
+      ),
+    );
+
+    final emitted = await states;
+    expect(emitted.first, const ReviewsLoading());
+    expect(
+      emitted.last,
+      isA<ReviewsFailure>().having((state) => state.lastAction, 'lastAction', ReviewAction.submitted),
+    );
+    expect(repository.reviews, hasLength(1));
+    await bloc.close();
+  });
 }
 
 final class _FakeRepository implements ReviewRepository, RequestFailureController {

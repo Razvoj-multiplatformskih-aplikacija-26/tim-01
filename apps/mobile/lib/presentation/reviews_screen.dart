@@ -29,16 +29,11 @@ final class ReviewsScreen extends StatelessWidget {
       ),
       body: BlocConsumer<ReviewBloc, ReviewState>(
         listener: (context, state) {
-          String? message;
-          if (state is ReviewsReady) {
-            if (state.actionError != null) {
-              message = domainErrorMessage(state.actionError!);
-            } else if (state.lastAction != null) {
-              message = reviewActionMessage(state.lastAction!);
-            }
-          } else if (state is ReviewActionFailure) {
-            message = domainErrorMessage(state.error);
-          }
+          final message = switch ((state.actionError, state.lastAction)) {
+            (final error?, _) => domainErrorMessage(error),
+            (_, final action?) => reviewActionMessage(action),
+            _ => null,
+          };
           if (message == null) return;
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
         },

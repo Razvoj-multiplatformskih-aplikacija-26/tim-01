@@ -43,12 +43,7 @@ final class _ModerationScreenState extends State<ModerationScreen> {
       ),
       body: BlocConsumer<ReviewBloc, ReviewState>(
         listener: (context, state) {
-          DomainError? error;
-          if (state is ReviewsReady) {
-            error = state.actionError;
-          } else if (state is ReviewActionFailure) {
-            error = state.error;
-          }
+          final error = state.actionError;
           if (error != null) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(domainErrorMessage(error))));
           }

@@ -2,6 +2,7 @@ export 'src/device.dart';
 export 'src/errors.dart';
 export 'src/identifiers.dart';
 export 'src/report_policy.dart';
+export 'src/review_permissions.dart';
 export 'src/repositories/review_repository.dart';
 export 'src/result.dart';
 export 'src/review/review.dart';

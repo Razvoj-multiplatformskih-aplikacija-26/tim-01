@@ -12,3 +12,12 @@ abstract interface class ReviewRepository {
 
   Future<Result<Review>> changeReviewStatus({required ReviewId id, required ReviewStatus status});
 }
+
+abstract interface class ReviewEditingRepository {
+  Future<Result<Review>> editReview({
+    required ReviewId id,
+    required String title,
+    required String body,
+    required int rating,
+  });
+}

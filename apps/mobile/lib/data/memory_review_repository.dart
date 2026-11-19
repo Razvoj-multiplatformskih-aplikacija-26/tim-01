@@ -1,11 +1,15 @@
 import 'package:blocs/blocs.dart';
 import 'package:domain/domain.dart';
 
-final class MemoryReviewRepository implements ReviewRepository, RequestFailureController {
-  MemoryReviewRepository(Iterable<Review> seed, {this.latency = const Duration(milliseconds: 350)})
-    : _reviews = List<Review>.of(seed);
+final class MemoryReviewRepository implements ReviewRepository, ReviewEditingRepository, RequestFailureController {
+  MemoryReviewRepository(
+    Iterable<Review> seed, {
+    this.latency = const Duration(milliseconds: 350),
+    this.viewer = const ReviewViewer(id: UserId('mobile-user'), role: UserRole.mobile),
+  }) : _reviews = List<Review>.of(seed);
 
   final Duration latency;
+  final ReviewViewer viewer;
   final List<Review> _reviews;
   var _failNext = false;
 
@@ -24,6 +28,31 @@ final class MemoryReviewRepository implements ReviewRepository, RequestFailureCo
     await _waitAndMaybeFail();
     _reviews.insert(0, review);
     return Success(review);
+  }
+
+  @override
+  Future<Result<Review>> editReview({
+    required ReviewId id,
+    required String title,
+    required String body,
+    required int rating,
+  }) async {
+    await _waitAndMaybeFail();
+    final actorId = viewer.id;
+    final role = viewer.role;
+    if (actorId == null || role == null) return const Failure(ForbiddenReviewAction());
+    final index = _indexOf(id);
+    if (index < 0) return const Failure(ReviewNotFound());
+    final result = editPendingReview(
+      _reviews[index],
+      actorId: actorId,
+      role: role,
+      title: title,
+      body: body,
+      rating: rating,
+    );
+    if (result case Success(:final value)) _reviews[index] = value;
+    return result;
   }
 
   @override
