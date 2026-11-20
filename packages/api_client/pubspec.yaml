@@ -1,0 +1,16 @@
+name: api_client
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.13.0
+dependencies:
+  api_contract:
+    path: ../api_contract
+  api_mapping:
+    path: ../api_mapping
+  domain:
+    path: ../domain
+  http: 1.6.0
+
+dev_dependencies:
+  test: 1.31.1

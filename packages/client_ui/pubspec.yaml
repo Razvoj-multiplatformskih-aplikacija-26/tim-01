@@ -1,0 +1,21 @@
+name: client_ui
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.13.0
+dependencies:
+  api_client:
+    path: ../api_client
+  api_mapping:
+    path: ../api_mapping
+  domain:
+    path: ../domain
+  flutter:
+    sdk: flutter
+  flutter_secure_storage: 11.2.0
+  http: 1.6.0
+  web: 1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
