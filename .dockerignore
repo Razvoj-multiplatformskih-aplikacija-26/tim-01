@@ -1,0 +1,19 @@
+# Only the server and its Dart workspace packages are needed in the build context.
+**
+!apps/
+!apps/server/
+!apps/server/**
+!packages/
+!packages/domain/
+!packages/domain/**
+!packages/api_contract/
+!packages/api_contract/**
+!packages/api_mapping/
+!packages/api_mapping/**
+**/.dart_tool/
+**/build/
+**/coverage/
+**/test/
+**/pubspec.lock
+**/.env*
+apps/server/db/

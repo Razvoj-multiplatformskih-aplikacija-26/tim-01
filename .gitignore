@@ -19,3 +19,8 @@ coverage/
 **/ios/Flutter/ephemeral/
 **/macos/Flutter/ephemeral/
 **/windows/flutter/ephemeral/
+
+# Local environment overrides and secrets
+.env
+.env.*
+!.env.example
