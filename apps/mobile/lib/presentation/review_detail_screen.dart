@@ -2,10 +2,9 @@ import 'package:blocs/blocs.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'app_text.dart';
-
-const currentMobileUser = UserId('mobile-user');
 
 final class ReviewDetailScreen extends StatelessWidget {
   const ReviewDetailScreen({required this.reviewId, super.key});
@@ -14,13 +13,42 @@ final class ReviewDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final viewer = context.watch<ReviewViewer>();
+    final bloc = context.read<ReviewBloc>();
     return Scaffold(
       appBar: AppBar(title: const Text('Detalj recenzije')),
       body: BlocBuilder<ReviewBloc, ReviewState>(
         builder: (context, state) {
-          if (state is! ReviewsReady) return const Center(child: CircularProgressIndicator());
+          if (state is ReviewInitial || state is ReviewsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is ReviewsFailure || state is ReviewActionFailure) {
+            final error = state.actionError ?? (state is ReviewsFailure ? state.loadError : null);
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(domainErrorMessage(error ?? const ServerUnavailable())),
+                  const SizedBox(height: 12),
+                  FilledButton(
+                    onPressed: () => bloc.add(const ReviewsRequested()),
+                    child: const Text('Pokušaj ponovo'),
+                  ),
+                ],
+              ),
+            );
+          }
+          if (state is! ReviewsReady) return const Center(child: Text('Recenzija više nije dostupna.'));
           final review = _findReview(state.reviews, ReviewId(reviewId));
-          if (review == null) return const Center(child: Text('Recenzija nije pronađena.'));
+          if (review == null) {
+            return Center(
+              child: Text(
+                state.lastAction == ReviewAction.reported
+                    ? 'Prijava je zabeležena. Recenzija više nije javno dostupna.'
+                    : 'Recenzija više nije dostupna.',
+              ),
+            );
+          }
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
@@ -34,12 +62,20 @@ final class ReviewDetailScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 Text('Recenzija je privremeno sakrivena posle $uniqueReportCount različite prijave.'),
               ],
-              if (review.status is ReviewPublished && review.authorId != currentMobileUser) ...[
+              if (canReportReview(review, viewer.id, viewer.role)) ...[
                 const SizedBox(height: 24),
                 OutlinedButton.icon(
-                  onPressed: () => _confirmReport(context, review),
+                  onPressed: () => _confirmReport(context, review.id, viewer.id!),
                   icon: const Icon(Icons.flag_outlined),
                   label: const Text('Prijavi sadržaj'),
+                ),
+              ],
+              if (bloc.canEditReviews && canEditOwnPendingReview(review, viewer.id, viewer.role)) ...[
+                const SizedBox(height: 24),
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/reviews/${review.id.value}/edit'),
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Izmeni recenziju'),
                 ),
               ],
             ],
@@ -49,7 +85,7 @@ final class ReviewDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmReport(BuildContext context, Review review) async {
+  Future<void> _confirmReport(BuildContext context, ReviewId id, UserId reporterId) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog.adaptive(
@@ -62,7 +98,7 @@ final class ReviewDetailScreen extends StatelessWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    context.read<ReviewBloc>().add(ReviewReported(id: review.id, reporterId: currentMobileUser));
+    context.read<ReviewBloc>().add(ReviewReported(id: id, reporterId: reporterId));
   }
 
   Review? _findReview(List<Review> reviews, ReviewId id) {

@@ -1,7 +1,7 @@
 import 'package:device_guide_mobile/app.dart';
 import 'package:device_guide_mobile/data/demo_reviews.dart';
 import 'package:device_guide_mobile/data/memory_review_repository.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -56,5 +56,33 @@ void main() {
     await tester.tap(find.text('Pokušaj ponovo'));
     await tester.pumpAndSettle();
     expect(find.text('Prijatniji je za svakodnevno sušenje'), findsOneWidget);
+  });
+
+  testWidgets('loads the author’s pending review in the edit form and displays the saved edit', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(412, 915));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final repository = MemoryReviewRepository(createDemoReviews(), latency: Duration.zero);
+    await tester.pumpWidget(DeviceGuideMobileApp(repository: repository, failureController: repository));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Pogledaj recenzije'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Prijatniji je za svakodnevno sušenje'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Izmeni recenziju'));
+    await tester.pumpAndSettle();
+
+    final title = find.byType(TextFormField).first;
+    expect(tester.widget<TextFormField>(title).controller!.text, 'Prijatniji je za svakodnevno sušenje');
+    await tester.enterText(title, 'Ažuriran naslov moje recenzije');
+    final saveButton = find.text('Sačuvaj izmene');
+    await tester.ensureVisible(saveButton);
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Detalj recenzije'), findsOneWidget);
+    expect(find.text('Ažuriran naslov moje recenzije'), findsOneWidget);
+    expect(find.text('Status: Na proveri'), findsOneWidget);
+    expect(find.text('Izmene recenzije su sačuvane.'), findsOneWidget);
   });
 }

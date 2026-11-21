@@ -8,10 +8,10 @@ import 'presentation/app_theme.dart';
 import 'router.dart';
 
 final class DeviceGuideBackofficeApp extends StatefulWidget {
-  const DeviceGuideBackofficeApp({required this.repository, required this.failureController, super.key});
+  const DeviceGuideBackofficeApp({required this.repository, this.failureController, super.key});
 
   final ReviewRepository repository;
-  final RequestFailureController failureController;
+  final RequestFailureController? failureController;
 
   @override
   State<DeviceGuideBackofficeApp> createState() => _DeviceGuideBackofficeAppState();

@@ -1,3 +1,4 @@
+import 'package:client_ui/client_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,7 +10,7 @@ final class CatalogScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Vodič za uređaje')),
+      appBar: AppBar(title: const Text('Vodič za uređaje'), actions: const [SessionMenuButton()]),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: demoDevices.length + 1,
@@ -25,9 +26,7 @@ final class CatalogScreen extends StatelessWidget {
                   children: [
                     Text('Pronađite odgovarajući uređaj', style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Početni KT1 katalog koristi lažne podatke. Upitnik i poređenje dolaze u sledećim iteracijama.',
-                    ),
+                    const Text('Pogledajte uređaje u katalogu i iskustva drugih korisnika.'),
                     const SizedBox(height: 12),
                     FilledButton.icon(
                       onPressed: () => context.go('/reviews'),

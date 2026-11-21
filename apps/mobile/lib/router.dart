@@ -1,3 +1,4 @@
+import 'package:domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,6 +30,11 @@ GoRouter createMobileRouter() {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/reviews/new',
         builder: (context, state) => const ReviewFormScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/reviews/:id/edit',
+        builder: (context, state) => ReviewFormScreen(editReviewId: ReviewId(state.pathParameters['id']!)),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,

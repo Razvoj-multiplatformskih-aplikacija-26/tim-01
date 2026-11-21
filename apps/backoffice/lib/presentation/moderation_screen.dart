@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:blocs/blocs.dart';
+import 'package:client_ui/client_ui.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,20 +26,23 @@ final class _ModerationScreenState extends State<ModerationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bloc = context.read<ReviewBloc>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Moderacija recenzija'),
         actions: [
-          IconButton(
-            tooltip: 'Izazovi grešku sledećeg zahteva',
-            onPressed: () => context.read<ReviewBloc>().add(const ReviewFailureDemoRequested()),
-            icon: const Icon(Icons.bug_report_outlined),
-          ),
+          if (bloc.canSimulateFailure)
+            IconButton(
+              tooltip: 'Izazovi grešku sledećeg zahteva',
+              onPressed: () => bloc.add(const ReviewFailureDemoRequested()),
+              icon: const Icon(Icons.bug_report_outlined),
+            ),
           IconButton(
             tooltip: 'Osveži',
-            onPressed: () => context.read<ReviewBloc>().add(const ReviewsRequested()),
+            onPressed: () => bloc.add(const ReviewsRequested()),
             icon: const Icon(Icons.refresh),
           ),
+          const SessionMenuButton(),
         ],
       ),
       body: BlocConsumer<ReviewBloc, ReviewState>(
@@ -50,7 +54,10 @@ final class _ModerationScreenState extends State<ModerationScreen> {
         },
         builder: (context, state) => switch (state) {
           ReviewInitial() || ReviewsLoading() => const Center(child: CircularProgressIndicator()),
-          ReviewsFailure() => _FailureView(onRetry: () => context.read<ReviewBloc>().add(const ReviewsRequested())),
+          ReviewsFailure(:final loadError) => _FailureView(
+            onRetry: () => bloc.add(const ReviewsRequested()),
+            message: loadError == null ? null : domainErrorMessage(loadError),
+          ),
           ReviewsEmpty() => const Center(child: Text('Nema recenzija za obradu.')),
           ReviewActionFailure() => _FailureView(
             onRetry: () => context.read<ReviewBloc>().add(const ReviewsRequested()),
@@ -403,9 +410,10 @@ final class _DetailPanel extends StatelessWidget {
 }
 
 final class _FailureView extends StatelessWidget {
-  const _FailureView({required this.onRetry});
+  const _FailureView({required this.onRetry, this.message});
 
   final VoidCallback onRetry;
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
@@ -413,7 +421,7 @@ final class _FailureView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Podaci trenutno ne mogu da se učitaju.'),
+          Text(message ?? 'Podaci trenutno ne mogu da se učitaju.'),
           const SizedBox(height: 12),
           FilledButton(onPressed: onRetry, child: const Text('Pokušaj ponovo')),
         ],

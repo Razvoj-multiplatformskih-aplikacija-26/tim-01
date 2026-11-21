@@ -8,10 +8,16 @@ import 'presentation/app_theme.dart';
 import 'router.dart';
 
 final class DeviceGuideMobileApp extends StatefulWidget {
-  const DeviceGuideMobileApp({required this.repository, required this.failureController, super.key});
+  const DeviceGuideMobileApp({
+    required this.repository,
+    this.failureController,
+    this.viewer = const ReviewViewer(id: UserId('mobile-user'), role: UserRole.mobile),
+    super.key,
+  });
 
   final ReviewRepository repository;
-  final RequestFailureController failureController;
+  final ReviewViewer viewer;
+  final RequestFailureController? failureController;
 
   @override
   State<DeviceGuideMobileApp> createState() => _DeviceGuideMobileAppState();
@@ -31,18 +37,21 @@ final class _DeviceGuideMobileAppState extends State<DeviceGuideMobileApp> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ReviewBloc(
-        repository: widget.repository,
-        failureController: widget.failureController,
-        idGenerator: _nextReviewId,
-        clock: DateTime.now,
-      )..add(const ReviewsRequested()),
-      child: MaterialApp.router(
-        title: 'Vodič za uređaje',
-        debugShowCheckedModeBanner: false,
-        theme: buildMobileTheme(),
-        routerConfig: _router,
+    return RepositoryProvider<ReviewViewer>.value(
+      value: widget.viewer,
+      child: BlocProvider(
+        create: (_) => ReviewBloc(
+          repository: widget.repository,
+          failureController: widget.failureController,
+          idGenerator: _nextReviewId,
+          clock: DateTime.now,
+        )..add(const ReviewsRequested()),
+        child: MaterialApp.router(
+          title: 'Vodič za uređaje',
+          debugShowCheckedModeBanner: false,
+          theme: buildMobileTheme(),
+          routerConfig: _router,
+        ),
       ),
     );
   }

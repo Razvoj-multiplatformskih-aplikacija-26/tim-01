@@ -8,6 +8,8 @@ environment:
 resolution: workspace
 
 dependencies:
+  client_ui:
+    path: ../../packages/client_ui
   blocs:
     path: ../../packages/blocs
   domain:

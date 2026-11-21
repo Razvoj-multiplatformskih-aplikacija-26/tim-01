@@ -15,7 +15,19 @@ try {
   & $flutter.Source pub get
   if ($LASTEXITCODE -ne 0) { throw 'flutter pub get nije uspeo.' }
 
-  & dart format --output=none --set-exit-if-changed .
+  # Exclude generated build trees, including Android plugin paths on Windows.
+  $dartSources = @(
+    'apps/mobile/lib', 'apps/mobile/test',
+    'apps/backoffice/lib', 'apps/backoffice/test',
+    'apps/server/bin', 'apps/server/lib', 'apps/server/tool'
+  )
+  $dartSources += Get-ChildItem -Directory 'packages' | ForEach-Object {
+    foreach ($subdirectory in 'lib', 'test') {
+      $source = Join-Path $_.FullName $subdirectory
+      if (Test-Path -LiteralPath $source) { $source }
+    }
+  }
+  & dart format --output=none --set-exit-if-changed @dartSources
   if ($LASTEXITCODE -ne 0) { throw 'dart format je pronašao neformatirane fajlove.' }
 
   & $flutter.Source analyze
@@ -26,6 +38,17 @@ try {
 
   & dart test packages/blocs
   if ($LASTEXITCODE -ne 0) { throw 'Testovi paketa blocs nisu uspeli.' }
+
+  & dart test packages/api_client
+  if ($LASTEXITCODE -ne 0) { throw 'Testovi HTTP klijenta nisu uspeli.' }
+
+  Push-Location 'packages\client_ui'
+  try {
+    & $flutter.Source test
+    if ($LASTEXITCODE -ne 0) { throw 'Testovi prijave i sesije nisu uspeli.' }
+  } finally {
+    Pop-Location
+  }
 
   Push-Location 'apps\mobile'
   try {

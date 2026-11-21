@@ -6,8 +6,8 @@ plugins {
 
 android {
     namespace = "rs.raf.rma.device_guide_mobile"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = "30.0.16248370"
+    compileSdk = maxOf(flutter.compileSdkVersion, providers.gradleProperty("deviceGuide.compileSdk").get().toInt())
+    ndkVersion = providers.gradleProperty("deviceGuide.ndkVersion").get()
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
